@@ -81,28 +81,28 @@ backtrace_executor_run_hook(QueryDesc *queryDesc,
 		standard_ExecutorRun(queryDesc, direction, count, execute_once);
 }
 
-static void backtrace_utility_hook(PlannedStmt *pstmt,
-								   const char *queryString, ProcessUtilityContext context,
-								   ParamListInfo params,
+static void backtrace_utility_hook(PlannedStmt *pstmt, const char *queryString,
+							bool readOnlyTree, ProcessUtilityContext context,
+							ParamListInfo params,
 								   QueryEnvironment *queryEnv,
-								   DestReceiver *dest, char *completionTag)
+								   DestReceiver *dest, QueryCompletion *completionTag)
 {
 	backtrace_register_error_callback();
 	if (prev_utility_hook)
-		(*prev_utility_hook)(pstmt, queryString,
+		(*prev_utility_hook)(pstmt, queryString, readOnlyTree,
 							 context, params, queryEnv,
 							 dest, completionTag);
 	else
-		standard_ProcessUtility(pstmt, queryString,
+		standard_ProcessUtility(pstmt, queryString, readOnlyTree,
 								context, params, queryEnv,
 								dest, completionTag);
 }
 
-static void backtrace_post_parse_analyze_hook(ParseState *pstate, Query *query)
+static void backtrace_post_parse_analyze_hook(ParseState *pstate, Query *query, JumbleState* jstate)
 {
 	backtrace_register_error_callback();
 	if (prev_post_parse_analyze_hook)
-		prev_post_parse_analyze_hook(pstate, query);
+		prev_post_parse_analyze_hook(pstate, query, jstate);
 }
 
 
@@ -181,6 +181,10 @@ Datum pg_backtrace_init(PG_FUNCTION_ARGS)
 
 Datum pg_backtrace_sigsegv(PG_FUNCTION_ARGS)
 {
-	*(int*)0 = 0;
+//	volatile int *n = 0;
+//
+//	*n = 0;
+//	*((int*) 0) = 0;
+	__builtin_trap();
 	PG_RETURN_VOID();
 }

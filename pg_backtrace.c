@@ -21,7 +21,7 @@ void _PG_init(void);
 void _PG_fini(void);
 
 PG_FUNCTION_INFO_V1(pg_backtrace_init);
-PG_FUNCTION_INFO_V1(pg_backtrace_sigsegv);
+PG_FUNCTION_INFO_V1(pg_backtrace_force_crash);
 
 static int backtrace_level = ERROR;
 static ErrorContextCallback backtrace_callback;
@@ -171,7 +171,7 @@ void _PG_fini(void)
 }
 
 Datum pg_backtrace_init(PG_FUNCTION_ARGS);
-Datum pg_backtrace_sigsegv(PG_FUNCTION_ARGS);
+Datum pg_backtrace_force_crash(PG_FUNCTION_ARGS);
 
 
 Datum pg_backtrace_init(PG_FUNCTION_ARGS)
@@ -179,12 +179,20 @@ Datum pg_backtrace_init(PG_FUNCTION_ARGS)
 	PG_RETURN_VOID();
 }
 
-Datum pg_backtrace_sigsegv(PG_FUNCTION_ARGS)
+Datum pg_backtrace_force_crash(PG_FUNCTION_ARGS)
 {
-//	volatile int *n = 0;
-//
-//	*n = 0;
-//	*((int*) 0) = 0;
+#  ifdef __has_builtin
+#    if __has_builtin(__builtin_trap)
+#      define HAVE_BUILTIN_TRAP
+#    endif
+#  endif
+
+#ifdef HAVE_BUILTIN_TRAP
 	__builtin_trap();
+#else
+	volatile int *n = 0;
+	*n = 0;
+	abort();
+#endif
 	PG_RETURN_VOID();
 }

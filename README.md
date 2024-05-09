@@ -24,7 +24,7 @@ Stack traces are written into the logfile (even if dumping cores is disabled):
 2018-11-12 18:25:52.636 MSK [24518] LOG:  Caught signal 11
 2018-11-12 18:25:52.636 MSK [24518] CONTEXT:  	/home/username/postgresql/dist/lib/pg_backtrace.so(+0xe37) [0x7f6358838e37]
 		/lib/x86_64-linux-gnu/libpthread.so.0(+0x11390) [0x7f63624e3390]
-		/home/username/postgresql/dist/lib/pg_backtrace.so(pg_backtrace_sigsegv+0) [0x7f6358838fb0]
+		/home/username/postgresql/dist/lib/pg_backtrace.so(pg_backtrace_force_crash+0) [0x7f6358838fb0]
 		postgres: username postgres [local] SELECT() [0x5fe474]
 		postgres: username postgres [local] SELECT() [0x6266a8]
 		postgres: username postgres [local] SELECT(standard_ExecutorRun+0x15a) [0x60193a]
@@ -39,9 +39,9 @@ Stack traces are written into the logfile (even if dumping cores is disabled):
 		postgres: username postgres [local] SELECT(_start+0x29) [0x47e589]
 ```
 
-To manually raise SIGSEGV signal run (debug only!!!):
+Strictly debug only!!! To manually crash with SIGTRAP (where compatible) or SIGSEGV (otherwise) signal run:
 ```
-SELECT pg_backtrace_sigsegv();
+SELECT pg_backtrace_force_crash();
 ```
 
 ### Set minimum error level for stack trace:

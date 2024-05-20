@@ -8,6 +8,8 @@ are dumped into logfile.
 # Setup
 
 ```
+git clone https://github.com/pashkinelfe/pg_backtrace.git
+cd pg_backtrace
 make USE_PGXS=1 clean && make USE_PGXS=1 -j4 && make USE_PGXS=1 install
 ```
 
